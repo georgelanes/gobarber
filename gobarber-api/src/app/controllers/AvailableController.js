@@ -4,9 +4,13 @@ import {
   setHours,
   setMinutes,
   setSeconds,
-  format,
   isAfter,
+  parseISO,
 } from 'date-fns';
+
+import { format, utcToZonedTime } from 'date-fns-tz';
+import enUS from 'date-fns/locale/en-US';
+
 import { Op } from 'sequelize';
 import Appointment from '../models/Appointment';
 
@@ -51,9 +55,12 @@ class AvailableController {
         0
       );
 
+      let formattedDate = format(value, "yyyy-MM-dd'T'HH:mm:ssxxx");
+      formattedDate = formattedDate.replace('-02:00', '-03:00');
+
       return {
         time,
-        value: format(value, "yyyy-MM-dd'T'HH:mm:ssxxx"),
+        value: formattedDate,
         available:
           isAfter(value, new Date()) &&
           !appointments.find(a => format(a.date, 'HH:mm') === time),
