@@ -56,7 +56,7 @@ class AvailableController {
       );
 
       let formattedDate = format(value, "yyyy-MM-dd'T'HH:mm:ssxxx");
-      formattedDate = formattedDate.replace('-02:00', '-03:00');
+      formattedDate = formattedDate.replace('-02:00', '');
 
       return {
         time,

@@ -19,14 +19,21 @@ class ScheduleController {
     }
 
     const { date } = req.query;
+    // console.log('DATE FILTER: ', date);
+
     const parseDate = parseISO(date);
+
+    const startDay = startOfDay(parseDate);
+    const endDay = endOfDay(parseDate);
+
+    // console.log(startDay, ' - ', endDay);
 
     const list = await Appointment.findAll({
       where: {
         provider_id: req.userId,
         canceled_at: null,
         date: {
-          [Op.between]: [startOfDay(parseDate), endOfDay(parseDate)],
+          [Op.between]: [startDay, endDay],
         },
       },
       order: ['date'],

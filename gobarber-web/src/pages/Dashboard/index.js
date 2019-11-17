@@ -3,9 +3,6 @@ import {
   format,
   subDays,
   addDays,
-  setHours,
-  setMinutes,
-  setSeconds,
   isBefore,
   isEqual,
   parseISO,
@@ -25,7 +22,7 @@ export default function Dashboard() {
   const [date, setDate] = useState(new Date());
 
   const dateFormatted = useMemo(
-    () => format(date, "d 'de' MMMM", { locale: pt }),
+    () => format(date, "EEEE, d 'de' MMMM", { locale: pt }),
     [date]
   );
 
@@ -39,22 +36,28 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function loadSchedule() {
+      const dateFilter = format(date, "yyyy-MM-dd'T'HH:mm:ssxxx", {
+        locale: pt,
+      });
+
       const response = await api.get('schedule', {
-        params: { date },
+        params: { date: dateFilter },
       });
 
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
       const data = range.map(hour => {
-        const checkDate = setSeconds(setMinutes(setHours(date, hour), 0), 0);
+        const checkDate = new Date();
+        checkDate.setUTCHours(hour, 0, 0, 0);
         const compareDate = utcToZonedTime(checkDate, timezone);
+        const appointment = response.data.find(a =>
+          isEqual(parseISO(a.date), compareDate)
+        );
 
         return {
           time: `${hour}:00h`,
           past: isBefore(compareDate, new Date()),
-          appointment: response.data.find(a =>
-            isEqual(parseISO(a.date), compareDate)
-          ),
+          appointment,
         };
       });
 
